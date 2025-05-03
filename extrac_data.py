@@ -17,6 +17,9 @@ def get_stock_history(stock: str, period: str, interval: str) -> pd.DataFrame:
     hist = ticker.history(period=period, interval=interval)
     hist.reset_index(inplace=True)
     hist['stock'] = stock
+
+    print(hist)
+
     return hist
 
 
@@ -43,5 +46,9 @@ def get_stock_history_cached(stock: str, period: str, interval: str) -> pd.DataF
         # Otherwise pull from API and cache it
         df = get_stock_history(stock, period, interval)
         df.to_csv(filename, index=False)
+    
+    print(df)
 
     return df
+
+get_stock_history("MSFT", "1mo", "1d")
