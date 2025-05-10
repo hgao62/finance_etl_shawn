@@ -18,7 +18,7 @@ def get_stock_history(stock: str, period: str, interval: str) -> pd.DataFrame:
     hist.reset_index(inplace=True)
     hist['stock'] = stock
 
-    print(hist)
+    #print(hist)
 
     return hist
 
@@ -47,11 +47,11 @@ def get_stock_history_cached(stock: str, period: str, interval: str) -> pd.DataF
         df = get_stock_history(stock, period, interval)
         df.to_csv(filename, index=False)
     
-    print(df)
+    #print(df)
 
     return df
 
-get_stock_history("MSFT", "1mo", "1d")
+#get_stock_history("MSFT", "1mo", "1d")
 
 
 
@@ -76,7 +76,7 @@ def get_exchange_rate(from_currency: str, to_currency: str, period: str, interva
     fx_rates["From Currency"] = from_currency
     fx_rates["To Currency"] = to_currency
 
-    print(fx_rates)
+    #print(fx_rates)
     return fx_rates
 
 
@@ -94,7 +94,7 @@ def get_stock_currency_code(stock: str) -> str:
     ticker = yf.Ticker(stock)
     currency = ticker.fast_info.get("currency", "N/A")
 
-    print(f"Currency for {stock} is {currency}")
+    #print(f"Currency for {stock} is {currency}")
     return currency
 
 
@@ -123,7 +123,7 @@ def get_news(stock: str) -> pd.DataFrame:
     columns_to_keep = ["stock", "uuid", "title", "publisher", "link", "providerPublishTime", "type"]
     df = df[[col for col in columns_to_keep if col in df.columns]]
 
-    print(df.head())  # Optional: show top 5 entries
+    #print(df.head())  # Optional: show top 5 entries
     return df
 
 
