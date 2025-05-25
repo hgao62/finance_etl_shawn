@@ -39,7 +39,11 @@ def add_stock_returns(stock_history: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with new columns 'daily_return' and 'cumulative_return'.
     """
+    
     df = stock_history.copy()
+
+    # Standardize column names (in case Date is capitalized)
+    df.columns = [col.lower() for col in df.columns]
 
     if 'close' not in df.columns:
         raise ValueError("Input DataFrame must contain a 'close' column")
@@ -55,6 +59,10 @@ def add_stock_returns(stock_history: pd.DataFrame) -> pd.DataFrame:
 
 
 from extract_data import get_exchange_rate
+# Add currency_code column using get_stock_currency_code
+from extract_data import get_stock_currency_code
+
+
 
 def standardize_price_to_usd(stock_history: pd.DataFrame) -> pd.DataFrame:
     """
@@ -68,9 +76,17 @@ def standardize_price_to_usd(stock_history: pd.DataFrame) -> pd.DataFrame:
     """
     df = stock_history.copy()
 
+    # Standardize column names (in case Date is capitalized)
+   df.columns = [col.lower() for col in df.columns]
+
     # Check if currency column exists
     if 'currency_code' not in df.columns:
-        raise ValueError("Input DataFrame must contain a 'currency_code' column.")
+        if 'stock' in df.columns:
+            ticker = df['stock'].iloc[0]
+            df['currency_code'] = get_stock_currency_code(ticker)
+        else:
+            raise ValueError("Missing both 'currency_code' and 'stock' columns — cannot determine currency.")
+
 
     # Get local currency from the first row
     local_currency = df['currency_code'].iloc[0]
@@ -83,13 +99,30 @@ def standardize_price_to_usd(stock_history: pd.DataFrame) -> pd.DataFrame:
 
     # Get FX rate from local currency to USD
     fx_df = get_exchange_rate(local_currency, "USD", "1mo", "1d")
+    fx_df.reset_index(inplace=True)
 
-    # Process FX rate DataFrame to match the format
-    fx_df.rename(columns={"Date": "date", "Close": "fx_rate"}, inplace=True)
-    fx_df = fx_df[["date", "fx_rate"]]
+    # Flatten MultiIndex columns if present
+    if isinstance(fx_df.columns, pd.MultiIndex):
+        fx_df.columns = fx_df.columns.get_level_values(0)
 
-    # Merge FX rates with the stock data
-    df = pd.merge(df, fx_df, how="left", on="date")
+    fx_df.columns = [col.lower() for col in fx_df.columns]
+
+    # Ensure required columns exist
+    if "close" not in fx_df.columns or "date" not in fx_df.columns:
+        raise ValueError("FX data is missing 'close' or 'date' columns.")
+
+    fx_df.rename(columns={"close": "fx_rate"}, inplace=True)
+
+    # Normalize datetime (drop timezone)
+    df["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None)
+    fx_df["date"] = pd.to_datetime(fx_df["date"]).dt.tz_localize(None)
+
+    # Merge
+    df = pd.merge(df, fx_df[["date", "fx_rate"]], how="left", on="date")
+
+    if "fx_rate" not in df.columns:
+        raise ValueError("FX merge failed — 'fx_rate' column missing after merge.")
+
 
     # Calculate the USD close price
     df['usd_close'] = df['close'] * df['fx_rate']
@@ -114,6 +147,9 @@ def calculate_moving_average(stock_history: pd.DataFrame, window: int = 5) -> pd
         pd.DataFrame: Updated DataFrame with a new 'moving_average' column.
     """
     df = stock_history.copy()
+
+    # Standardize column names (in case Date is capitalized)
+    df.columns = [col.lower() for col in df.columns]
 
     # Check if the 'close' column exists
     if 'close' not in df.columns:
@@ -141,6 +177,9 @@ def get_top_bottom_days(stock_history: pd.DataFrame, ticker: str, top_n: int = 5
         pd.DataFrame: Combined DataFrame of top N and bottom N days by close price.
     """
     df = stock_history.copy()
+
+    # Standardize column names (in case Date is capitalized)
+    df.columns = [col.lower() for col in df.columns]
 
     # Filter by ticker
     df = df[df['stock'] == ticker]
@@ -174,6 +213,9 @@ def group_by_sector(stock_history: pd.DataFrame) -> pd.DataFrame:
         pd.DataFrame: DataFrame with average close price and average volume grouped by sector.
     """
     df = stock_history.copy()
+
+    # Standardize column names (in case Date is capitalized)
+    df.columns = [col.lower() for col in df.columns]
 
     # Check if the required columns exist
     if not {'sector', 'close', 'volume'}.issubset(df.columns):

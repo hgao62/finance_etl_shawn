@@ -1,0 +1,37 @@
+from typing import List
+from extract_data import get_stock_history, get_exchange_rate,get_stock_currency_code
+
+from load_data import save_df_to_db
+
+
+#tickers = ["MSFT", "AAPL", "SHOP.TO"]
+
+ticker =  "SHOP.TO"
+period: str = "1mo"
+interval: str = "1d"
+
+stock_history = get_stock_history(ticker, period, interval)
+
+#rint(stock_history.head())
+
+
+df = stock_history.copy()
+
+df.columns = [col.lower() for col in df.columns]
+
+# Check if currency column exists
+if 'currency_code' not in df.columns:
+    if 'stock' in df.columns:
+        ticker = df['stock'].iloc[0]
+        df['currency_code'] = get_stock_currency_code(ticker)
+    else:
+        raise ValueError("Missing both 'currency_code' and 'stock' columns — cannot determine currency.")
+
+
+# Get local currency from the first row
+local_currency = df['currency_code'].iloc[0]
+
+
+
+fx_df = get_exchange_rate(local_currency, "USD", "1mo", "1d")
+print(fx_df.head())
