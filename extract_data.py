@@ -51,8 +51,11 @@ def get_stock_history_cached(stock: str, period: str, interval: str) -> pd.DataF
 
     return df
 
+<<<<<<< HEAD:extract_data.py
 #get_stock_history("MSFT", "1mo", "1d")
 
+=======
+>>>>>>> bbe278f280f4e6c5f40d55820af67649f5eb636d:extrac_data.py
 
 
 def get_exchange_rate(from_currency: str, to_currency: str, period: str, interval: str) -> pd.DataFrame:

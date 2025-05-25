@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> bbe278f280f4e6c5f40d55820af67649f5eb636d
 import pandas as pd
 
 def normalize_stock_data(stock_history: pd.DataFrame) -> pd.DataFrame:
@@ -26,6 +29,7 @@ def normalize_stock_data(stock_history: pd.DataFrame) -> pd.DataFrame:
             df[col] = df[col].round(2)
 
     return df
+<<<<<<< HEAD
 
 
 
@@ -229,3 +233,5 @@ def group_by_sector(stock_history: pd.DataFrame) -> pd.DataFrame:
 
     #print(grouped_df)  # Optional: Print for quick inspection
     return grouped_df
+=======
+>>>>>>> bbe278f280f4e6c5f40d55820af67649f5eb636d
