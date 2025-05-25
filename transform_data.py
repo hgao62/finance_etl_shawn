@@ -77,7 +77,7 @@ def standardize_price_to_usd(stock_history: pd.DataFrame) -> pd.DataFrame:
     df = stock_history.copy()
 
     # Standardize column names (in case Date is capitalized)
-   df.columns = [col.lower() for col in df.columns]
+    df.columns = [col.lower() for col in df.columns]
 
     # Check if currency column exists
     if 'currency_code' not in df.columns:
